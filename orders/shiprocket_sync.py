@@ -37,7 +37,7 @@ def find_remote_order(order):
             for row in data.get('data', []):
                 exact = str(row.get('channel_order_id', '')) == source_id
                 legacy = (str(row.get('channel_order_id', '')) == str(order.pk)
-                          and str(row.get('comment', '')).strip() == f'Rastlina order #{order.pk}')
+                          and str(row.get('comment', '')).strip() in (f'Plants Wala order #{order.pk}', f'Rastlina order #{order.pk}'))
                 if exact or legacy:
                     return row
             pages = data.get('meta', {}).get('pagination', {}).get('total_pages', 1)

@@ -125,7 +125,7 @@ def create_shiprocket_order(order, *, package=None) -> dict:
         "order_id": f"RST-{order.id}",
         "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
         "pickup_location": getattr(settings, "SHIPROCKET_PICKUP_LOCATION", "Primary"),
-        "comment": f"Rastlina order #{order.id}",
+        "comment": f"Plants Wala order #{order.id}",
         "billing_customer_name": order.first_name,
         "billing_last_name": order.last_name,
         "billing_address": order.shipping_address,

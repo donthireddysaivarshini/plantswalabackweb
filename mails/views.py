@@ -20,7 +20,7 @@ class ContactEmailView(APIView):
             'message': data.get('message'),
         }
 
-        subject = f"New Rastlina Lead: {context['issue_type']} from {context['name']}"
+        subject = f"New Plants Wala Lead: {context['issue_type']} from {context['name']}"
         
         try:
             html_content = render_to_string('mails/contact_email.html', context)

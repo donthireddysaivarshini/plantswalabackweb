@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def notification_body(order):
-    lines = [f'New paid order #{order.pk} on www.rastlina.com', '',
+    lines = [f'New paid order #{order.pk} on www.plantswala.com', '',
              f'Customer: {order.first_name} {order.last_name}',
              f'Email: {order.email}', f'Phone: {order.phone}', '', 'Items:']
     for item in order.items.all():
@@ -24,7 +24,7 @@ def notification_body(order):
               f'Order status: {order.order_status}', '', 'Shipping address:',
               order.shipping_address, order.apartment or '', order.landmark or '',
               f'{order.city}, {order.state} {order.zip_code}, {order.country}', '',
-              f'Open order: https://admin.rastlina.com/admin/orders/order/{order.pk}/change/']
+              f'Open order: https://admin.plantswala.com/admin/orders/order/{order.pk}/change/']
     return '\n'.join(lines)
 
 
@@ -46,10 +46,10 @@ class Command(BaseCommand):
                 try:
                     connection = get_connection(timeout=20, fail_silently=False)
                     msg = EmailMessage(
-                        subject=f'Rastlina: New order #{order.pk} - INR {order.total_amount}',
+                        subject=f'Plants Wala: New order #{order.pk} - INR {order.total_amount}',
                         body=notification_body(order), from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[row.recipient], connection=connection,
-                        headers={'Message-ID': f'<rastlina-order-{order.pk}@rastlina.com>'})
+                        headers={'Message-ID': f'<plantswala-order-{order.pk}@plantswala.com>'})
                     if msg.send(fail_silently=False) != 1:
                         raise RuntimeError('EmailNotAccepted')
                     row.sent_at = timezone.now()

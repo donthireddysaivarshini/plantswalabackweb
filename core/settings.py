@@ -113,14 +113,11 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    # RECOMMENDED: Add rate limiting to prevent abuse [cite: 190-192]
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-    ],
+    # Disable global anonymous throttling to prevent 429 Too Many Requests on page load
+    'DEFAULT_THROTTLE_CLASSES': [],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',
-        'user': '1000/hour',
+        'anon': '10000/day',
+        'user': '50000/day',
     },
 }
 SIMPLE_JWT = {
@@ -141,7 +138,13 @@ REST_AUTH = {
 # ─── ALLAUTH / GOOGLE OAUTH ──────────────────────────────────────────────────
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        
+        'APPS': [
+            {
+                'client_id': config('GOOGLE_CLIENT_ID', default=''),
+                'secret': config('GOOGLE_CLIENT_SECRET', default=''),
+                'key': '',
+            },
+        ],
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
         'OAUTH_PKCE_ENABLED': True,
@@ -162,8 +165,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://localhost:8080",
     "http://127.0.0.1:5173",
-    "https://rastlina.com",      # Add your production domain
-    "https://www.rastlina.com",  # Add your www subdomain
+    "https://plantswala.com",
+    "https://www.plantswala.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -173,8 +176,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5174",
     "http://localhost:8080",
     "http://127.0.0.1:5173",
-    "https://rastlina.com",      # Add for CSRF production protection
-    "https://www.rastlina.com",  # Add for CSRF production protection
+    "https://plantswala.com",
+    "https://www.plantswala.com",
 ]
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
@@ -185,6 +188,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # ─── EMAIL ────────────────────────────────────────────────────────────────────
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
@@ -192,7 +196,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = f"Rastlina <{os.environ.get('EMAIL_HOST_USER', '')}>"
+DEFAULT_FROM_EMAIL = f"Plants Wala <{os.environ.get('EMAIL_HOST_USER', '')}>"
 
 # ─── RAZORPAY ─────────────────────────────────────────────────────────────────
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
@@ -208,10 +212,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─── JAZZMIN ADMIN THEME ─────────────────────────────────────────────────────
 JAZZMIN_SETTINGS = {
-    "site_title": "Rastlina Admin",
-    "site_header": "🌿 Rastlina",
-    "site_brand": "Rastlina",
-    "welcome_sign": "Welcome to Rastlina Plant Store Admin",
+    "site_title": "Plants Wala Admin",
+    "site_header": "🌿 Plants Wala",
+    "site_brand": "Plants Wala",
+    "welcome_sign": "Welcome to Plants Wala Admin",
     "search_model": ["store.Product", "orders.Order"],
     "show_ui_builder": False,
     "navigation_expanded": True,

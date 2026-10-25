@@ -5,7 +5,7 @@ from django.utils import timezone
 class OrderNotification(models.Model):
     order = models.OneToOneField('orders.Order', on_delete=models.CASCADE,
                                 related_name='merchant_notification')
-    recipient = models.EmailField(default='info.rastlina@gmail.com')
+    recipient = models.EmailField(default='support@plantswala.com')
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     attempts = models.PositiveIntegerField(default=0)
