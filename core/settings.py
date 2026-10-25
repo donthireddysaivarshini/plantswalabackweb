@@ -172,6 +172,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:8080",
+    "http://127.0.0.1:5173",
     "https://rastlina.com",      # Add for CSRF production protection
     "https://www.rastlina.com",  # Add for CSRF production protection
 ]
@@ -307,6 +308,6 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
-# Share cookies across the root domain and all subdomains
-SESSION_COOKIE_DOMAIN = '.rastlina.com'
-CSRF_COOKIE_DOMAIN = '.rastlina.com'
+# Share cookies across the root domain and all subdomains if configured
+SESSION_COOKIE_DOMAIN = config('SESSION_COOKIE_DOMAIN', default=None)
+CSRF_COOKIE_DOMAIN = config('CSRF_COOKIE_DOMAIN', default=None)
