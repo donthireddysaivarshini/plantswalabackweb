@@ -28,7 +28,7 @@ class HeroSlideSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HeroSlide
-        fields = ['id', 'image',  'link_url', 'order']
+        fields = ['id', 'image', 'title', 'subtitle', 'link_url', 'order']
 
     def get_image(self, obj):
         if obj.image:
