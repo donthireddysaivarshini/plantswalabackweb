@@ -528,10 +528,10 @@ class Command(BaseCommand):
                     'free_shipping_threshold': Decimal('1999.00'),
                     'tax_percentage': Decimal('0.00'),
                     'whatsapp_number': '918143814466',
-                    'instagram_url': 'https://instagram.com/plantswala',
+                    'instagram_url': 'https://www.instagram.com/plantswala8?mdxt=MzYyZ3F0aXR0dzNn',
                     'facebook_url': 'https://facebook.com/plantswala',
-                    'email': 'support@plantswala.com',
-                    'address': 'Hyderabad, Telangana, India'
+                    'email': 'plantswala8@gmail.com',
+                    'address': '46-16-32, Plants wala store, Opp to spark saloon, Danavaipeta, Rajahmundry - 533103'
                 }
             )
 
@@ -575,14 +575,18 @@ class Command(BaseCommand):
                 )
 
             social_proofs = [
-                ('smile', '50,000+ Happy Plant Parents', 'Across 120+ Indian cities', 1),
-                ('truck', 'Guaranteed Safe Delivery', 'Damage-free transit promise', 2),
-                ('star', '4.9/5 Rating', 'Over 12,000 verified reviews', 3),
+                ('smile', '50,000+', 'Happy Plant Parents', 1),
+                ('truck', 'Safe & Fresh', 'Guaranteed Delivery', 2),
+                ('star', '4.9/5', '12,000+ Reviews', 3),
             ]
+            SocialProofItem.objects.all().delete()
             for icon, title, subtitle, ord_val in social_proofs:
-                SocialProofItem.objects.update_or_create(
+                SocialProofItem.objects.create(
+                    icon=icon,
                     title=title,
-                    defaults={'icon': icon, 'subtitle': subtitle, 'order': ord_val, 'is_active': True}
+                    subtitle=subtitle,
+                    order=ord_val,
+                    is_active=True
                 )
 
         self.stdout.write(self.style.SUCCESS("Store data seeded successfully!"))

@@ -10,7 +10,7 @@ load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = ['*'] if DEBUG else config('ALLOWED_HOSTS', cast=Csv())
 
 # ─── INSTALLED APPS ──────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -157,6 +157,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
 
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
@@ -169,7 +170,17 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.plantswala.com",
 ]
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/.*\.vercel\.app$",
+]
+
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'ngrok-skip-browser-warning',
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
@@ -178,6 +189,11 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://plantswala.com",
     "https://www.plantswala.com",
+    "https://*.ngrok-free.app",
+    "https://*.ngrok.app",
+    "https://*.ngrok-free.dev",
+    "https://*.trycloudflare.com",
+    "https://*.vercel.app",
 ]
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
@@ -189,8 +205,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# ─── EMAIL ────────────────────────────────────────────────────────────────────
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# ─── EMAIL (Temporarily Disabled - Enquiries routed via WhatsApp) ─────────────
+EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -199,8 +215,8 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = f"Plants Wala <{os.environ.get('EMAIL_HOST_USER', '')}>"
 
 # ─── RAZORPAY ─────────────────────────────────────────────────────────────────
-RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
-RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
 
 # ─── TIMEZONE ─────────────────────────────────────────────────────────────────
 TIME_ZONE = 'Asia/Kolkata'
@@ -276,22 +292,8 @@ JAZZMIN_UI_TWEAKS = {
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
 RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
-# ─── SHIPROCKET ───────────────────────────────────────────────────────────────
-SHIPROCKET_EMAIL = os.environ.get('SHIPROCKET_EMAIL', '')
-SHIPROCKET_PASSWORD = os.environ.get('SHIPROCKET_PASSWORD', '')
-SHIPROCKET_PICKUP_LOCATION = os.environ.get('SHIPROCKET_PICKUP_LOCATION', 'work')
-SHIPROCKET_PICKUP_PINCODE = os.environ.get('SHIPROCKET_PICKUP_PINCODE', '500084')
-# settings.py
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
-
 # Lead destination
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'plantswala8@gmail.com')
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)

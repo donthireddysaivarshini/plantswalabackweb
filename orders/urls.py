@@ -11,7 +11,6 @@ from .views import (
     ValidateExchangeCodeView,
     GuestOrderTrackView,
 )
-from .shiprocket_views import check_pincode_serviceability, track_shipment_view
 
 urlpatterns = [
     path('checkout/', CheckoutView.as_view(), name='checkout'),
@@ -22,7 +21,4 @@ urlpatterns = [
     path('<int:order_id>/return-product/', OrderReturnRequestCreateView.as_view(), name='return-product'),
     path('validate-exchange-code/', ValidateExchangeCodeView.as_view(), name='validate-exchange'),
     path('track/', GuestOrderTrackView.as_view(), name='guest-track'),
-    # Shiprocket
-    path('check-serviceability/', check_pincode_serviceability, name='check-serviceability'),
-    path('<int:pk>/track-shipment/', track_shipment_view, name='track-shipment'),
 ]

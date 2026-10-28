@@ -1,46 +1,32 @@
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.conf import settings
+import logging
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-import traceback
+
+logger = logging.getLogger(__name__)
 
 class ContactEmailView(APIView):
+    """
+    Enquiry receiver endpoint.
+    Primary customer contact flow is redirected directly to WhatsApp from the frontend.
+    This view remains as a safe fallback logger without SMTP dependency.
+    """
     permission_classes = [AllowAny]
+
     def post(self, request):
         data = request.data
-        context = {
-            'name': data.get('name'),
-            'email': data.get('email'),
-            'phone': data.get('phone'),
-            'issue_type': data.get('issue_type', 'Bulk Inquiry'),
-            'message': data.get('message'),
-        }
+        name = data.get('name', '')
+        phone = data.get('phone', '')
+        email = data.get('email', '')
+        issue_type = data.get('issue_type', 'Bulk Inquiry')
+        message = data.get('message', '')
 
-        subject = f"New Plants Wala Lead: {context['issue_type']} from {context['name']}"
-        
-        try:
-            html_content = render_to_string('mails/contact_email.html', context)
-            text_content = strip_tags(html_content)
-
-            msg = EmailMultiAlternatives(
-                subject,
-                text_content,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.ADMIN_EMAIL]
-            )
-            msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=False)
-
-            return Response({"detail": "Inquiry sent successfully"}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            print("--- SMTP/MAIL ERROR ---")
-            print(traceback.format_exc())
-            return Response(
-                {"error": "Failed to send email. Please check server logs."}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        logger.info(
+            "Customer Enquiry Received: %s (%s, %s) - Type: %s | Message: %s",
+            name, phone, email, issue_type, message
+        )
+        return Response(
+            {"detail": "Inquiry received successfully. Enquiries are also routed to WhatsApp."},
+            status=status.HTTP_200_OK
+        )

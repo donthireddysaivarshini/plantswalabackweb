@@ -84,7 +84,7 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.main_category.name} â€º {self.name}"
+        return f"{self.main_category.name} > {self.name}"
 
 
 class SpaceTag(models.Model):
@@ -171,7 +171,7 @@ class ColorOption(models.Model):
     )
     hex_code = models.CharField(
         max_length=7, blank=True,
-        help_text="Hex color code e.g. #E07B54 â€” shown as color dot on product page"
+        help_text="Hex color code e.g. #E07B54 — shown as color dot on product page"
     )
     order = models.PositiveIntegerField(default=0)
 
@@ -184,9 +184,9 @@ class ColorOption(models.Model):
         return f"{self.name}" + (f" ({self.hex_code})" if self.hex_code else "")
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────────
 # PRODUCT
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────────
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -207,7 +207,7 @@ class Product(models.Model):
         max_digits=10, decimal_places=2, null=True, blank=True,
         help_text="MRP / crossed-out price")
 
-    # â”€â”€ Plant Care Details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Plant Care Details ───────────────────────────────────────────────────
     care_level = models.CharField(max_length=50, blank=True,
         choices=[('easy', 'Easy Care'), ('moderate', 'Moderate'), ('expert', 'Expert')])
     sunlight = models.CharField(max_length=100, blank=True,
@@ -216,7 +216,7 @@ class Product(models.Model):
         help_text="e.g. 'Once a week'")
     temperature = models.CharField(
         max_length=100, blank=True,
-        help_text="Ideal temperature range e.g. '18Â°C â€“ 30Â°C' â€” shown in care guide"
+        help_text="Ideal temperature range e.g. '18°C – 30°C' — shown in care guide"
     )
     growth_rate = models.CharField(
         max_length=100, blank=True,
@@ -225,7 +225,7 @@ class Product(models.Model):
             ('moderate', 'Moderate'),
             ('fast', 'Fast'),
         ],
-        help_text="How fast the plant grows â€” shown in care guide"
+        help_text="How fast the plant grows — shown in care guide"
     )
     pet_friendly = models.BooleanField(null=True, blank=True)
     air_purifying = models.BooleanField(default=False)
@@ -234,17 +234,17 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     care_instructions = models.TextField(
         blank=True,
-        help_text="Detailed care guide â€” one tip per line. Shown in 'Care Guide' tab on product page.")
+        help_text="Detailed care guide — one tip per line. Shown in 'Care Guide' tab on product page.")
     what_you_get = models.TextField(
         blank=True,
-        help_text="What's included â€” one item per line\ne.g.:\n1 healthy plant\nEco-friendly packaging\nCare card")
+        help_text="What's included — one item per line\ne.g.:\n1 healthy plant\nEco-friendly packaging\nCare card")
 
     # Homepage toggles
     is_new_arrival = models.BooleanField(default=False)
     is_best_seller = models.BooleanField(default=False)
     is_trending = models.BooleanField(default=False)
     is_best_deal = models.BooleanField(default=False,
-        help_text="âœ… Tick to show in Golden Deals / Offers section")
+        help_text="Tick to show in Golden Deals / Offers section")
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -259,7 +259,7 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.sku} â€” {self.name}"
+        return f"{self.sku} — {self.name}"
 
     @property
     def main_category(self):
@@ -315,15 +315,15 @@ class ProductVariant(models.Model):
         Product, on_delete=models.CASCADE, related_name='variants')
     size = models.ForeignKey(
         SizeOption, on_delete=models.PROTECT, related_name='variants',
-        help_text="Pick a size â€” add new sizes in 'Size Options' panel")
+        help_text="Pick a size — add new sizes in 'Size Options' panel")
     color = models.ForeignKey(
         ColorOption, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='variants',
-        help_text="Pick a color â€” leave blank if no color variant. Add colors in 'Color Options' panel")
+        help_text="Pick a color — leave blank if no color variant. Add colors in 'Color Options' panel")
     stock = models.PositiveIntegerField(default=0)
     price_override = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.00,
-        help_text="Extra â‚¹ added to base price. Enter 0 for no change.")
+        help_text="Extra ₹ added to base price. Enter 0 for no change.")
 
     class Meta:
         unique_together = ('product', 'size', 'color')
@@ -360,9 +360,9 @@ class ProductVariant(models.Model):
         return self.color.hex_code if self.color else ""
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# PRODUCT IMAGE â€” Linked to ColorOption directly (cleaner than variant FK)
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────────
+# PRODUCT IMAGE — Linked to ColorOption directly (cleaner than variant FK)
+# ─────────────────────────────────────────────────────────────────────────────
 
 class ProductImage(models.Model):
     """
@@ -388,7 +388,7 @@ class ProductImage(models.Model):
     help_text="Featured image. Multiple images can be marked as primary."
 )
     order = models.PositiveIntegerField(default=0,
-        help_text="Display order â€” lower number = shown first")
+        help_text="Display order — lower number = shown first")
 
     class Meta:
         ordering = ['order', 'id']
@@ -398,9 +398,9 @@ class ProductImage(models.Model):
         return f"{'[PRIMARY] ' if self.is_primary else ''}Image for {self.product.sku}{color_str}"
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────────
 # REVIEW
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────────
 
 class Review(models.Model):
     product = models.ForeignKey(
@@ -423,7 +423,7 @@ class Review(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user_name} â€” {self.product.name} ({self.rating}â˜…)"
+        return f"{self.user_name} — {self.product.name} ({self.rating}★)"
 
 
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -560,4 +560,4 @@ class Coupon(models.Model):
         )
 
     def __str__(self):
-        return f"{self.code} ({self.discount_type} â€” {self.value})"
+        return f"{self.code} ({self.discount_type} — {self.value})"

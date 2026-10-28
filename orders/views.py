@@ -236,6 +236,7 @@ class CheckoutView(APIView):
                     subtotal += server_price * quantity
 
                     color_id = variant.color_id if variant and variant.color else None
+                    primary_img = None
                     if color_id:
                         primary_img = (
                             product.images
@@ -243,7 +244,7 @@ class CheckoutView(APIView):
                             .first()
                             or product.images.filter(color_id=color_id).first()
                         )
-                    else:
+                    if not primary_img:
                         primary_img = (
                             product.images.filter(is_primary=True).first()
                             or product.images.first()
@@ -266,6 +267,13 @@ class CheckoutView(APIView):
                         'image_url': img_url,
                     })
 
+                # ── Mutual Exclusivity: Prevent stacking coupon + exchange code ──
+                if coupon_code and exchange_code_input:
+                    return Response(
+                        {'error': 'Promotional coupons cannot be combined with an exchange code.'},
+                        status=400,
+                    )
+
                 # ── Step 2: Validate coupon (read-only) ───────────────────────
                 discount_amount = Decimal('0.00')
                 if coupon_code:
@@ -282,7 +290,7 @@ class CheckoutView(APIView):
                                 status=400,
                             )
                         if coupon.discount_type == 'percentage':
-                            discount_amount = (subtotal * coupon.value) / 100
+                            discount_amount = Decimal(round((subtotal * coupon.value) / 100))
                         else:
                             discount_amount = min(coupon.value, subtotal)
                     except Coupon.DoesNotExist:
@@ -296,8 +304,10 @@ class CheckoutView(APIView):
                         if exchange_obj.expires_at and exchange_obj.expires_at < timezone.now():
                             return Response({'error': 'Exchange code has expired.'}, status=400)
                         if subtotal < exchange_obj.original_order_value:
+                            needed = round(float(exchange_obj.original_order_value - subtotal))
+                            min_val = round(float(exchange_obj.original_order_value))
                             return Response(
-                                {'error': f'New order must be at least ₹{exchange_obj.original_order_value} to use this code.'},
+                                {'error': f'This exchange code requires a minimum order value of ₹{min_val}. Please add items worth ₹{needed} more to apply.'},
                                 status=400,
                             )
                         exchange_discount = exchange_obj.original_order_value
@@ -306,7 +316,7 @@ class CheckoutView(APIView):
 
                 # ── Step 4: Calculate fees ────────────────────────────────────
                 taxable = max(Decimal('0'), subtotal - discount_amount - exchange_discount)
-                tax_amount = (taxable * tax_pct) / 100
+                tax_amount = Decimal(round((taxable * tax_pct) / 100))
 
                 if free_threshold > 0 and subtotal >= free_threshold:
                     shipping_fee = Decimal('0.00')
@@ -514,16 +524,34 @@ class ValidateExchangeCodeView(APIView):
         if not code:
             return Response({'valid': False, 'error': 'Code is required.'}, status=400)
 
+        subtotal_raw = request.data.get('subtotal')
+
         try:
             exchange = ExchangeCode.objects.get(code=code, is_used=False)
             if exchange.expires_at and exchange.expires_at < timezone.now():
                 return Response({'valid': False, 'error': 'Exchange code has expired.'}, status=400)
+
+            min_val = round(float(exchange.original_order_value))
+            if subtotal_raw is not None:
+                try:
+                    subtotal = Decimal(str(subtotal_raw))
+                    if subtotal < exchange.original_order_value:
+                        needed = round(float(exchange.original_order_value - subtotal))
+                        return Response({
+                            'valid': False,
+                            'error': f'This exchange code requires a minimum order value of ₹{min_val}. Please add items worth ₹{needed} more to apply.',
+                            'original_order_value': float(exchange.original_order_value),
+                            'needed': float(needed),
+                        }, status=400)
+                except (ValueError, TypeError):
+                    pass
+
             return Response({
                 'valid': True,
                 'code': exchange.code,
                 'original_order_value': float(exchange.original_order_value),
                 'expires_at': exchange.expires_at,
-                'message': f'Code valid! New order must be at least ₹{exchange.original_order_value}.',
+                'message': f'Exchange code applied! (₹{min_val} credit applied)',
             })
         except ExchangeCode.DoesNotExist:
             return Response({'valid': False, 'error': 'Invalid or already used exchange code.'}, status=400)

@@ -12,6 +12,7 @@ from .models import ExchangeCode, Order, OrderItem, OrderReturnRequest, ReturnRe
 class OrderItemSerializer(serializers.ModelSerializer):
     product_slug = serializers.SerializerMethodField()
     item_total = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
@@ -25,6 +26,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     def get_item_total(self, obj):
         return float(obj.price * obj.quantity)
+
+    def get_image_url(self, obj):
+        if obj.image_url:
+            return obj.image_url
+        if obj.product:
+            request = self.context.get('request')
+            img = obj.product.images.filter(is_primary=True).first() or obj.product.images.first()
+            if img and img.image:
+                return request.build_absolute_uri(img.image.url) if request else img.image.url
+        return ''
 
 
 class ExchangeCodeSerializer(serializers.ModelSerializer):

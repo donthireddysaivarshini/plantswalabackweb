@@ -11,7 +11,6 @@ from django.utils.html import format_html
 from django.contrib import messages
 from .services import approve_return_request, approve_exchange_request
 from .models import ExchangeCode, Order, OrderItem, OrderReturnRequest, ReturnRequest
-from .shiprocket_service import create_shipment, cancel_shipment, get_shipping_label
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -87,47 +86,6 @@ def export_to_excel(modeladmin, request, queryset):
 export_to_excel.short_description = "Export selected orders to Excel"
 
 
-def create_shiprocket_shipment(modeladmin, request, queryset):
-    for order in queryset:
-        if not modeladmin.has_change_permission(request, order):
-            continue
-        result = create_shipment(order)
-        if result['success']:
-            message = 'Queued for Shiprocket New Orders.' if result.get('queued') else 'Already synced to Shiprocket.'
-            modeladmin.message_user(request, f'Order #{order.id}: {message}', level=messages.SUCCESS)
-        else:
-            modeladmin.message_user(request, f"Order #{order.id}: {result.get('error')}", level=messages.WARNING)
-
-create_shiprocket_shipment.short_description = 'Sync selected paid orders to Shiprocket (New Orders)'
-create_shiprocket_shipment.allowed_permissions = ['change']
-
-
-def cancel_shiprocket_shipment(modeladmin, request, queryset):
-    for order in queryset:
-        result = cancel_shipment(order)
-        if result["success"]:
-            modeladmin.message_user(request, f"Order #{order.id} cancelled on Shiprocket.", level=messages.SUCCESS)
-        else:
-            modeladmin.message_user(request, f"Order #{order.id} cancel failed: {result.get('error')}", level=messages.ERROR)
-
-cancel_shiprocket_shipment.short_description = "❌ Cancel Shiprocket shipment"
-
-
-def fetch_shipping_label(modeladmin, request, queryset):
-    for order in queryset:
-        sid = getattr(order, "shiprocket_shipment_id", None)
-        if not sid:
-            modeladmin.message_user(request, f"Order #{order.id} has no Shiprocket shipment yet.", level=messages.WARNING)
-            continue
-        result = get_shipping_label(int(sid))
-        if result["success"]:
-            modeladmin.message_user(request, f"Order #{order.id} label: {result.get('label_url')}", level=messages.SUCCESS)
-        else:
-            modeladmin.message_user(request, f"Order #{order.id} label failed: {result.get('error')}", level=messages.ERROR)
-
-fetch_shipping_label.short_description = "🏷️ Fetch Shiprocket label URL"
-
-
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
@@ -140,25 +98,11 @@ class OrderItemInline(admin.TabularInline):
     image_preview.short_description = 'Image'
 
 
-from .shipping_models import ShiprocketSync
-
-
-class ShiprocketSyncInline(admin.StackedInline):
-    model = ShiprocketSync
-    extra = 0
-    can_delete = False
-    readonly_fields = ['status', 'plant_count', 'attempts', 'last_error', 'next_attempt_at', 'synced_at']
-    fields = readonly_fields
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'id', 'full_name', 'phone', 'is_guest', 'total_amount',
-        'payment_status', 'order_status', 'short_address', 'created_at', 'shipping_sync_status',
+        'payment_status', 'order_status', 'short_address', 'created_at',
     ]
     list_editable = ['order_status', 'payment_status']
     list_filter = ['payment_status', 'order_status', 'created_at']
@@ -166,14 +110,8 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = [
         'created_at', 'updated_at', 'razorpay_order_id', 'razorpay_payment_id',
     ]
-    actions = [export_to_excel, create_shiprocket_shipment, cancel_shiprocket_shipment, fetch_shipping_label]
-    inlines = [OrderItemInline, ShiprocketSyncInline]
-    @admin.display(description='Shiprocket sync')
-    def shipping_sync_status(self, obj):
-        row = ShiprocketSync.objects.filter(order_id=obj.pk).first()
-        if row:
-            return row.status
-        return 'Synced (existing)' if obj.shiprocket_order_id else 'Not queued'
+    actions = [export_to_excel]
+    inlines = [OrderItemInline]
 
     list_per_page = 25
     fieldsets = (
@@ -200,7 +138,7 @@ class OrderAdmin(admin.ModelAdmin):
             ),
         }),
         ('Policy', {'fields': ('accepted_return_policy',)}),
-        ('Tracking', {'fields': ('tracking_link', 'tracking_note')}),
+        ('Tracking', {'fields': ('tracking_link', 'tracking_note', 'awb_code')}),
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
 

@@ -6,6 +6,6 @@ class OrdersConfig(AppConfig):
     name = 'orders'
 
     def ready(self):
-        from . import notification_signals  # noqa: F401
-        from . import shipping_signals  # noqa: F401
+        # Shipping and email notification signals disabled per requirements
+        pass
 
