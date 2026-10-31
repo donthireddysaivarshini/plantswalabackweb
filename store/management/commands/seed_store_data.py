@@ -527,7 +527,7 @@ class Command(BaseCommand):
                     'shipping_fee': Decimal('99.00'),
                     'free_shipping_threshold': Decimal('1999.00'),
                     'tax_percentage': Decimal('0.00'),
-                    'whatsapp_number': '918143814466',
+                    'whatsapp_number': '918897021560',
                     'instagram_url': 'https://www.instagram.com/plantswala8?mdxt=MzYyZ3F0aXR0dzNn',
                     'facebook_url': 'https://facebook.com/plantswala',
                     'email': 'plantswala8@gmail.com',
